@@ -70,8 +70,27 @@ def export_sudoku(grid, file_path):
     df.to_csv(file_path, header=False, index=False)
 
 def main():
-    # Always import the same file named 'import.csv'
-    grid, n = import_sudoku("import.csv")
+    # Prompt the user to choose difficulty level
+    print("Choisissez la difficulté de la grille :")
+    print("1. Facile")
+    print("2. Moyen")
+    print("3. Difficile")
+    
+    choice = int(input("Entrez votre choix (1/2/3) : "))
+    
+    if choice == 1:
+        file_name = "easy_csv.csv"
+    elif choice == 2:
+        file_name = "medium_csv.csv"
+    elif choice == 3:
+        file_name = "hard_csv.csv"
+    else:
+        print("Choix invalide. Utilisation par défaut du fichier facile.")
+        file_name = "easy_csv.csv"
+    
+    # Import the selected Sudoku grid1
+    
+    grid, n = import_sudoku(file_name)
 
     print("Grille avant résolution :")
     plot_sudoku(grid, n, title="Grille avant résolution")
