@@ -1,40 +1,79 @@
-import pandas as pd
 import matplotlib.pyplot as plt
 import math
+import pandas as pd
+
 
 def is_valid(grid, row, col, num, n):
+    """
+    Vérifie si un numéro peut être placé dans une cellule donnée pour une grille de taille n x n.
+
+    Args:
+        grid (list of list): La grille de Sudoku.
+        row (int): L'indice de la ligne.
+        col (int): L'indice de la colonne.
+        num (int): Le numéro à placer.
+        n (int): Taille de la grille (n x n).
+
+    Returns:
+        bool: True si le numéro peut être placé, False sinon.
+    """
+    # Vérifier la ligne
+    for i in range(n):
+        if grid[row][i] == num:
+            return False
+
+    # Vérifier la colonne
+    for i in range(n):
+        if grid[i][col] == num:
+            return False
+
+    # Vérifier la sous-grille √n x √n
     sqrt_n = int(math.sqrt(n))
     start_row, start_col = sqrt_n * (row // sqrt_n), sqrt_n * (col // sqrt_n)
-    
-    # Vérification de la ligne et de la colonne
-    if num in grid[row] or num in [grid[i][col] for i in range(n)]:
-        return False
-    
-    # Vérification de la sous-grille √n x √n
     for i in range(start_row, start_row + sqrt_n):
         for j in range(start_col, start_col + sqrt_n):
             if grid[i][j] == num:
                 return False
-    
+
     return True
 
+
 def solve_sudoku(grid, n):
+    """
+    Résout la grille de Sudoku en utilisant l'algorithme de backtracking pour une grille de taille n x n.
+
+    Args:
+        grid (list of list): La grille de Sudoku à résoudre.
+        n (int): Taille de la grille (n x n).
+
+    Returns:
+        bool: True si la grille est résolue, False sinon.
+    """
     for row in range(n):
         for col in range(n):
-            if grid[row][col] == 0:
+            if grid[row][col] == 0:  # Trouver une cellule vide
                 for num in range(1, n + 1):
                     if is_valid(grid, row, col, num, n):
-                        grid[row][col] = num
+                        grid[row][col] = num  # Essayer ce numéro
                         if solve_sudoku(grid, n):
                             return True
-                        grid[row][col] = 0
+                        grid[row][col] = 0  # Backtrack si le numéro ne convient pas
                 return False
     return True
 
+
 def plot_sudoku(grid, n, title="Sudoku"):
+    """
+    Visualise une grille de Sudoku avec Matplotlib.
+
+    Args:
+        grid (list of list): La grille de Sudoku à visualiser.
+        n (int): Taille de la grille (n x n).
+        title (str): Titre de la visualisation.
+    """
     sqrt_n = int(math.sqrt(n))
     fig, ax = plt.subplots(figsize=(sqrt_n * 2, sqrt_n * 2))
-    ax.matshow([[1 if cell == 0 else 0 for cell in row] for row in grid], cmap='Blues')
+    ax.matshow([[1 if cell == 0 else 0 for cell in row] for row in grid], cmap='Blues', alpha=0.3)
 
     for i in range(n):
         for j in range(n):
@@ -53,56 +92,60 @@ def plot_sudoku(grid, n, title="Sudoku"):
     plt.title(title)
     plt.show()
 
-def import_sudoku(file_path):
-    """
-    Import a Sudoku grid from a CSV file.
-    The CSV file should contain the grid where 0 represents empty cells.
-    """
-    grid = pd.read_csv(file_path, header=None).values
-    n = len(grid)  # Assuming a square grid
-    return grid, n
 
-def export_sudoku(grid, file_path):
+def load_sudoku_from_csv(filepath):
     """
-    Export a solved Sudoku grid to a CSV file.
-    """
-    df = pd.DataFrame(grid)
-    df.to_csv(file_path, header=False, index=False)
+    Charge des grilles de Sudoku à partir d'un fichier CSV.
 
-def main():
-    # Prompt the user to choose difficulty level
-    print("Choisissez la difficulté de la grille :")
-    print("1. Facile")
-    print("2. Moyen")
-    print("3. Difficile")
-    
-    choice = int(input("Entrez votre choix (1/2/3) : "))
-    
-    if choice == 1:
-        file_name = "easy_csv.csv"
-    elif choice == 2:
-        file_name = "medium_csv.csv"
-    elif choice == 3:
-        file_name = "hard_csv.csv"
-    else:
-        print("Choix invalide. Utilisation par défaut du fichier facile.")
-        file_name = "easy_csv.csv"
-    
-    # Import the selected Sudoku grid1
-    
-    grid, n = import_sudoku(file_name)
+    Args:
+        filepath (str): Le chemin du fichier CSV.
+
+    Returns:
+        dict: Un dictionnaire avec des clés de difficultés et des valeurs de grilles de Sudoku.
+    """
+    df = pd.read_csv(filepath, header=None)
+    sudokus = {'easy': [], 'medium': [], 'hard': []}
+
+    for index, row in df.iterrows():
+        if index == 0:  # Skipping the header line (indices)
+            continue
+        if index < 4:  # First three rows are for the easy 3x3 grid
+            sudokus['easy'].append(list(row[:3]))  # Only take the first 3 elements for 3x3 grid
+        elif index < 13:  # Next nine rows are for the medium 9x9 grid
+            sudokus['medium'].append(list(row[:9]))  # Only take the first 9 elements for 9x9 grid
+        else:  # The rest are for the hard 16x16 grid
+            sudokus['hard'].append(list(row[:16]))  # Take the first 16 elements for 16x16 grid
+
+    # Convert all elements to integers
+    for key in sudokus.keys():
+        sudokus[key] = [[int(cell) for cell in row] for row in sudokus[key]]
+
+    return sudokus
+
+
+# Charger les grilles de Sudoku depuis le fichier CSV
+filepath = input("Entrez le chemin du fichier CSV : ")
+sudokus = load_sudoku_from_csv(filepath)
+
+# Demander à l'utilisateur de choisir une difficulté
+print("Difficultés disponibles :")
+for difficulty in sudokus.keys():
+    print(f"- {difficulty}")
+
+chosen_difficulty = input("Choisissez une difficulté (easy, medium, hard) : ")
+
+# Vérifier si la difficulté choisie existe et résoudre la grille
+if chosen_difficulty in sudokus:
+    grid = sudokus[chosen_difficulty]
+    n = len(grid)  # Taille de la grille (n x n)
 
     print("Grille avant résolution :")
-    plot_sudoku(grid, n, title="Grille avant résolution")
+    plot_sudoku(grid, n, title=f"Grille {chosen_difficulty} avant résolution")
 
     if solve_sudoku(grid, n):
         print("Grille après résolution :")
-        plot_sudoku(grid, n, title="Grille après résolution")
-        # Export the resolved grid to a CSV file named 'resolved.csv'
-        export_sudoku(grid, "resolved.csv")
-        print("Grille résolue exportée vers resolved.csv")
+        plot_sudoku(grid, n, title=f"Grille {chosen_difficulty} après résolution")
     else:
         print("Pas de solution trouvée.")
-
-if __name__ == "__main__":
-    main()
+else:
+    print("Difficulté non trouvée.")
