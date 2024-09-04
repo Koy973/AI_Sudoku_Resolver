@@ -1,6 +1,7 @@
 import numpy as np
 import time
 from main import solve_sudoku, is_valid, load_sudoku_from_csv
+from graph_sudoku import sudoku_to_graph, color_sudoku  # Importer les fonctions nécessaires
 
 def solve_sudoku_numpy(grid, n):
     """
@@ -30,7 +31,7 @@ def benchmark():
         # Convert grid to NumPy array for NumPy benchmark
         grid_np = np.array(grid)
 
-        # Pure Python
+        # Pure Python (Backtracking)
         start_time = time.time()
         solve_sudoku(grid, n)
         python_duration = time.time() - start_time
@@ -40,9 +41,17 @@ def benchmark():
         solve_sudoku_numpy(grid_np, n)
         numpy_duration = time.time() - start_time
 
+        # Graph Coloring
+        start_time = time.time()
+        G = sudoku_to_graph(grid, n)
+        color_sudoku(G, grid, n)
+        graph_coloring_duration = time.time() - start_time
+
         print(f"Performance for {difficulty} grid:")
-        print(f"Pure Python: {python_duration:.6f} seconds")
-        print(f"NumPy: {numpy_duration:.6f} seconds")
+        print(f"Pure Python (Backtracking): {python_duration:.6f} seconds")
+        print(f"NumPy Backtracking: {numpy_duration:.6f} seconds")
+        print(f"Graph Coloring: {graph_coloring_duration:.6f} seconds")
 
 if __name__ == "__main__":
     benchmark()
+

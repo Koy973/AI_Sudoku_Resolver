@@ -1,5 +1,5 @@
 import networkx as nx
-from main import load_sudoku_from_csv, plot_sudoku
+from utils import load_sudoku_from_csv, plot_sudoku  # Importer depuis utils.py
 
 def sudoku_to_graph(grid, n):
     """
@@ -38,7 +38,8 @@ def color_sudoku(graph, grid, n):
     colors = nx.coloring.greedy_color(graph, strategy="largest_first")
 
     for (i, j), color in colors.items():
-        grid[i][j] = color + 1
+        if grid[i][j] == 0:  # Ne colorer que les cellules vides
+            grid[i][j] = color + 1  # Ajuster la couleur pour qu'elle corresponde à 1-9
 
     return grid
 
@@ -53,3 +54,4 @@ if __name__ == "__main__":
     solved_grid = color_sudoku(G, grid, n)
 
     plot_sudoku(solved_grid, n, title="Sudoku Résolu par Graph Coloring")
+
