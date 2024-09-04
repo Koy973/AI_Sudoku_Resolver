@@ -131,3 +131,6 @@ Contributions are welcome! If you find any issues or have ideas for improvements
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Power point 
+lien canva : https://www.canva.com/design/DAGPyJdXgVM/11hRjgaMYOdU6W-emcmSMw/edit?utm_content=DAGPyJdXgVM&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
